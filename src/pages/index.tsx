@@ -172,10 +172,10 @@ export default function Index() {
                 },
             }}
           >
-            <InputLabel 
-            sx={{
-              color: !theme ? "white !important" : "black !important", // Màu chữ mặc định
-            }}
+            <InputLabel
+              sx={{
+                color: !theme ? "white !important" : "black !important", // Màu chữ mặc định
+              }}
             >
               Chọn bài
             </InputLabel>
@@ -183,13 +183,18 @@ export default function Index() {
               value={selectedValue}
               label="Chọn bài"
               onChange={handleChange}
-              className={cx(theme ? "text-[black]" : " text-[#fff]")}
+              sx={{
+                "& .MuiSelect-select": {
+                  color: !theme ? "white !important" : "black !important",
+                },
+              }}
               MenuProps={{
                 PaperProps: {
                   sx: {
                     backgroundColor: !theme ? "black" : "white", // Đặt màu nền cho menu là đen
                     border: theme ? "1px solid #dfdfdf" : "1px solid #74747459",
                     borderRadius: "10px",
+                    color: "red",
                   },
                 },
               }}
