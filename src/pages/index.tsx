@@ -172,7 +172,11 @@ export default function Index() {
                 },
             }}
           >
-            <InputLabel className={cx(theme ? "text-[black]" : " text-[#fff]")}>
+            <InputLabel 
+            sx={{
+              color: !theme ? "white !important" : "black !important", // Màu chữ mặc định
+            }}
+            >
               Chọn bài
             </InputLabel>
             <Select
