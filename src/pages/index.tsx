@@ -155,12 +155,12 @@ export default function Index() {
                       className={cx("btn")}
                     >
                       <FcIdea size={20} />
-                      {/* {!suggest
+                      {!suggest
                         ? "Hiển thị gợi ý"
-                        : currentCard.vietnameseText
-                        ? currentCard.vietnameseText[0] +
-                          "*".repeat(currentCard.vietnameseText.length - 1)
-                        : ""} */}
+                        : currentItems[0].vietnameseText
+                        ? currentItems[0].vietnameseText[0] +
+                          "*".repeat(currentItems[0].vietnameseText.length - 1)
+                        : ""}
                     </button>
                     <button
                       onClick={(e) =>
@@ -197,9 +197,9 @@ export default function Index() {
                       <FcIdea size={20} />
                       {!suggest
                         ? "Hiển thị gợi ý"
-                        : currentItems[0].vietnameseText
-                        ? currentItems[0].vietnameseText[0] +
-                          "*".repeat(currentItems[0].vietnameseText.length - 1)
+                        : currentItems[0].koreanText
+                        ? currentItems[0].koreanText[0] +
+                          "*".repeat(currentItems[0].koreanText.length - 1)
                         : ""}
                     </button>
                     <button

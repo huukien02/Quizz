@@ -34,7 +34,7 @@
         @apply flex flex-col gap-[10px] cursor-pointer h-[calc(100%-50px)] flex items-center justify-center;
 
         .korean-text {
-          @apply text-[55px];
+          @apply text-center text-[55px];
         }
       }
     }
