@@ -15,7 +15,7 @@ import KoreanMatchingGame from "./game";
 import Head from "next/head";
 import Add from "./add";
 import { getDatabase, ref, get, push } from "firebase/database";
-import app from "./firebaseConfig";
+import app from "../firebaseConfig";
 import { FaPlus } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

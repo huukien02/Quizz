@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Box, Button, Typography, TextField } from "@mui/material";
 
 import { getDatabase, ref, set, push } from "firebase/database";
-import app from "./firebaseConfig";
+import app from "../firebaseConfig";
 import { toast } from "react-toastify";
 
 interface Props {
