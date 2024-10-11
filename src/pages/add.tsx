@@ -1,22 +1,37 @@
 import React, { useState } from "react";
-import { Modal, Box, Button, Typography, TextField } from "@mui/material";
+import {
+  Modal,
+  Box,
+  Button,
+  Typography,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 
 import { getDatabase, ref, set, push } from "firebase/database";
 import app from "../firebaseConfig";
 import { toast } from "react-toastify";
+import { list } from ".";
 
 interface Props {
   open: any;
   setOpen: any;
 }
+
+
 const Add: React.FC<Props> = ({ open, setOpen }) => {
   const [koreanText, setKoreanText] = useState("");
   const [vietnameseText, setVietnameseText] = useState("");
+  const [selectedValue, setSelectedValue] = useState(list[0].name);
+
   const [error, setError] = useState(false);
 
   const handleAddText = async () => {
     const db = getDatabase(app);
-    const newDocRef = push(ref(db, "texts"));
+    const newDocRef = push(ref(db, selectedValue));
     set(newDocRef, {
       koreanText,
       vietnameseText,
@@ -31,6 +46,11 @@ const Add: React.FC<Props> = ({ open, setOpen }) => {
         console.log(error);
       });
   };
+
+  const handleChange = (event: any) => {
+    setSelectedValue(event.target.value);
+  };
+
   return (
     <Modal
       open={open}
@@ -52,6 +72,20 @@ const Add: React.FC<Props> = ({ open, setOpen }) => {
           borderRadius: 2,
         }}
       >
+        <FormControl fullWidth>
+          <InputLabel>Chọn bài</InputLabel>
+          <Select
+            value={selectedValue}
+            label="Chọn bài"
+            onChange={handleChange}
+          >
+            {list.map((item) => (
+              <MenuItem key={item.name} value={item.name}>
+                {item.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         {/* Korean Text Input */}
         <TextField
           label="Nhập tiếng Hàn"

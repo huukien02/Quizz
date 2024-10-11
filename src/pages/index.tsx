@@ -19,10 +19,56 @@ import app from "../firebaseConfig";
 import { FaPlus } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  Dialog,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 const cx = classNames.bind(styles);
 
+export const list = [
+  {
+    name: "bai-1",
+    title: "Bài 1",
+  },
+  {
+    name: "bai-2",
+    title: "Bài 2",
+  },
+  {
+    name: "bai-3",
+    title: "Bài 3",
+  },
+  {
+    name: "bai-4",
+    title: "Bài 4",
+  },
+  {
+    name: "bai-5",
+    title: "Bài 5",
+  },
+  {
+    name: "bai-6",
+    title: "Bài 6",
+  },
+  {
+    name: "bai-7",
+    title: "Bài 7",
+  },
+  {
+    name: "bai-8",
+    title: "Bài 8",
+  },
+  {
+    name: "bai-9",
+    title: "Bài 9",
+  },
+];
 export default function Index() {
   const [open, setOpen] = useState(false);
+  const [selectedValue, setSelectedValue] = useState(list[0].name);
 
   const [currentMenu, setCurrentMenu] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -44,16 +90,16 @@ export default function Index() {
   useEffect(() => {
     const fetchData = async () => {
       const db = getDatabase(app);
-      const dbRef = ref(db, "texts");
+      const dbRef = ref(db, selectedValue);
       const snapshot = await get(dbRef);
       if (snapshot.exists()) {
         setDataTexts(Object.values(snapshot.val()));
       } else {
-        alert("error");
+        toast.warn("Bài này chưa có từ khóa nào");
       }
     };
     fetchData();
-  }, [open]);
+  }, [open, selectedValue]);
 
   // Tính toán chỉ số của phần tử hiện tại dựa vào trang hiện tại
   const indexOfLastItem = currentPage * itemsPerPage; // Chỉ số của phần tử cuối cùng
@@ -73,6 +119,10 @@ export default function Index() {
   const handleShuffle = () => {
     const shuffledData = shuffleArray([...dataTexts]); // Tạo một bản sao và xáo trộn
     setDataTexts(shuffledData); // Cập nhật state với mảng xáo trộn
+  };
+
+  const handleChange = (event: any) => {
+    setSelectedValue(event.target.value);
   };
 
   return (
@@ -111,136 +161,184 @@ export default function Index() {
               {theme ? <MdOutlineDarkMode /> : <CiLight />}
             </button>
           </h1>
-          <div className={cx("menu")}>
-            <div
-              onClick={() => setCurrentMenu(0)}
-              className={cx(
-                "item",
-                theme ? "bg-[#eaeaf5]" : "border border-[#161616] "
-              )}
+          <FormControl
+            sx={{
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme ? "#dfdfdf" : "#74747459",
+              },
+              "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                {
+                  borderColor: "#586de2",
+                },
+            }}
+          >
+            <InputLabel className={cx(theme ? "text-[black]" : " text-[#fff]")}>
+              Chọn bài
+            </InputLabel>
+            <Select
+              value={selectedValue}
+              label="Chọn bài"
+              onChange={handleChange}
+              className={cx(theme ? "text-[black]" : " text-[#fff]")}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: !theme ? "black" : "white", // Đặt màu nền cho menu là đen
+                    border: theme ? "1px solid #dfdfdf" : "1px solid #74747459",
+                    borderRadius: "10px",
+                  },
+                },
+              }}
             >
-              <BiSolidCopy className="text-[blue]" size={25} />
-              <span>Lật Thẻ</span>
-            </div>
-
-            <div
-              onClick={() => setCurrentMenu(1)}
-              className={cx(
-                "item",
-                theme ? "bg-[#eaeaf5]" : "border border-[#161616] "
-              )}
-            >
-              <IoLogoGameControllerB className="text-[blue]" size={25} />
-              <span>Chơi game</span>
-            </div>
-          </div>
-          {currentMenu == 0 && (
-            <>
-              <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
-                <div
-                  className={cx(
-                    "card",
-                    theme
-                      ? "border border-[#e7e7e7]"
-                      : "border border-[#161616]"
-                  )}
-                  onClick={() => setIsFlipped(!isFlipped)}
-                >
-                  <div className={cx("header")}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSuggest(!suggest);
-                      }}
-                      className={cx("btn")}
-                    >
-                      <FcIdea size={20} />
-                      {!suggest
-                        ? "Hiển thị gợi ý"
-                        : currentItems[0].vietnameseText
-                        ? currentItems[0].vietnameseText[0] +
-                          "*".repeat(currentItems[0].vietnameseText.length - 1)
-                        : ""}
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleSpeak(e, currentItems[0].koreanText)
-                      }
-                      className={cx("btn")}
-                    >
-                      <GiSpeaker size={20} />
-                    </button>
-                  </div>
-                  <div className={cx("body")}>
-                    <span className={cx("korean-text")}>
-                      {currentItems[0] && currentItems[0].koreanText}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={cx(
-                    "card",
-                    theme
-                      ? "border border-[#e7e7e7]"
-                      : "border border-[#161616]"
-                  )}
-                  onClick={() => setIsFlipped(!isFlipped)}
-                >
-                  <div className={cx("header")}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSuggest(!suggest);
-                      }}
-                      className={cx("btn")}
-                    >
-                      <FcIdea size={20} />
-                      {!suggest
-                        ? "Hiển thị gợi ý"
-                        : currentItems[0].koreanText
-                        ? currentItems[0].koreanText[0] +
-                          "*".repeat(currentItems[0].koreanText.length - 1)
-                        : ""}
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleSpeak(e, currentItems[0].vietnameseText)
-                      }
-                      className={cx("btn")}
-                    >
-                      <GiSpeaker size={20} />
-                    </button>
-                  </div>
-                  <div className={cx("body")}>
-                    <span className={cx("korean-text")}>
-                      {currentItems[0] && currentItems[0].vietnameseText}
-                    </span>
-                  </div>
-                </div>
-              </ReactCardFlip>
-              <div className={cx("page")}>
-                <Pagination
-                  count={Math.ceil(dataTexts.length / itemsPerPage)}
-                  page={currentPage}
-                  onChange={(e, value) => {
-                    setIsFlipped(false);
-                    setCurrentPage(value);
-                  }}
-                  variant="outlined"
-                  color="primary"
+              {list.map((item: any) => (
+                <MenuItem
+                  key={item.name}
+                  value={item.name}
+                  selected={selectedValue === item.name} // Đánh dấu item là selected
                   sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: theme ? "black" : "white", // Thay đổi màu chữ tại đây
+                    backgroundColor:
+                      selectedValue === item.name
+                        ? theme
+                          ? "black"
+                          : "white"
+                        : "", // Màu nền nếu item được chọn
+                    color: !theme ? "white" : "black", // Màu chữ mặc định
+                    "&:hover": {
+                      backgroundColor:
+                        selectedValue === item.name
+                          ? theme
+                            ? "black"
+                            : "white"
+                          : "", // Màu nền khi hover
+                      color: "#586de2", // Màu chữ khi hover
+                    },
+                    "&.Mui-selected": {
+                      backgroundColor: !theme
+                        ? "black !important"
+                        : "white !important ", // Màu nền cho item được chọn
+                      color: "#586de2", // Màu chữ cho item được chọn
                     },
                   }}
-                />
-                <button onClick={handleShuffle}>
-                  <LiaRandomSolid size={25} />
+                >
+                  {item.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
+            <div
+              className={cx(
+                "card",
+                theme ? "border border-[#e7e7e7]" : "border border-[#161616]"
+              )}
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <div className={cx("header")}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSuggest(!suggest);
+                  }}
+                  className={cx("btn")}
+                >
+                  <FcIdea size={20} />
+                  {!suggest
+                    ? "Hiển thị gợi ý"
+                    : currentItems[0].vietnameseText
+                    ? currentItems[0].vietnameseText.replace(
+                        /\S/g,
+                        (char: any, index: any) => {
+                          // Check if the character is the first character of a word
+                          return index === 0 ||
+                            currentItems[0].vietnameseText[index - 1] === " "
+                            ? char // Return the character if it's the first character of a word
+                            : "*"; // Replace with '*' otherwise
+                        }
+                      )
+                    : ""}
+                </button>
+                <button
+                  onClick={(e) => handleSpeak(e, currentItems[0].koreanText)}
+                  className={cx("btn")}
+                >
+                  <GiSpeaker size={20} />
                 </button>
               </div>
-            </>
-          )}
-          {currentMenu == 1 && <KoreanMatchingGame />}
+              <div className={cx("body")}>
+                <span className={cx("korean-text")}>
+                  {currentItems[0] && currentItems[0].koreanText}
+                </span>
+              </div>
+            </div>
+            <div
+              className={cx(
+                "card",
+                theme ? "border border-[#e7e7e7]" : "border border-[#161616]"
+              )}
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <div className={cx("header")}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSuggest(!suggest);
+                  }}
+                  className={cx("btn")}
+                >
+                  <FcIdea size={20} />
+
+                  {!suggest
+                    ? "Hiển thị gợi ý"
+                    : currentItems[0].koreanText
+                    ? currentItems[0].koreanText.replace(
+                        /\S/g,
+                        (char: any, index: any) => {
+                          // Check if the character is the first character of a word
+                          return index === 0 ||
+                            currentItems[0].koreanText[index - 1] === " "
+                            ? char // Return the character if it's the first character of a word
+                            : "*"; // Replace with '*' otherwise
+                        }
+                      )
+                    : ""}
+                </button>
+                <button
+                  onClick={(e) =>
+                    handleSpeak(e, currentItems[0].vietnameseText)
+                  }
+                  className={cx("btn")}
+                >
+                  <GiSpeaker size={20} />
+                </button>
+              </div>
+              <div className={cx("body")}>
+                <span className={cx("korean-text")}>
+                  {currentItems[0] && currentItems[0].vietnameseText}
+                </span>
+              </div>
+            </div>
+          </ReactCardFlip>
+          <div className={cx("page")}>
+            <Pagination
+              count={Math.ceil(dataTexts.length / itemsPerPage)}
+              page={currentPage}
+              onChange={(e, value) => {
+                setIsFlipped(false);
+                setCurrentPage(value);
+              }}
+              variant="outlined"
+              color="primary"
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  color: theme ? "black" : "white", // Thay đổi màu chữ tại đây
+                },
+              }}
+            />
+            <button onClick={handleShuffle}>
+              <LiaRandomSolid size={25} />
+            </button>
+          </div>
         </div>
       </div>
       <ToastContainer />

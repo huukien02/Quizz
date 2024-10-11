@@ -1,10 +1,11 @@
 .ctn {
   @apply w-screen h-screen;
   @apply flex items-center justify-center px-[10px];
-
+  // color: #74747459;
+  // color: #dfdfdf;
   .w {
     box-shadow: #35353559 0px 5px 15px;
-    @apply w-[900px] h-[750px] rounded-[15px] flex flex-col gap-[20px] px-[10px];
+    @apply w-[900px] h-[700px] rounded-[15px] flex flex-col gap-[20px] px-[10px];
 
     .title {
       @apply h-[50px] flex items-center justify-between  font-sans text-[25px];
