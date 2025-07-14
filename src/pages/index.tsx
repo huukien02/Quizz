@@ -125,6 +125,29 @@ export default function Index() {
     setSelectedValue(event.target.value);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const tag = (event.target as HTMLElement).tagName.toLowerCase();
+      if (tag === "input" || tag === "textarea") return; // Không hoạt động khi đang nhập
+
+      if (
+        event.key === "ArrowRight" &&
+        currentPage < Math.ceil(dataTexts.length / itemsPerPage)
+      ) {
+        setCurrentPage((prev) => prev + 1);
+      } else if (event.key === "ArrowLeft" && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      } else if (event.key === "Enter") {
+        setIsFlipped((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentPage, dataTexts.length]);
+
   return (
     <>
       <Head>
