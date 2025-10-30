@@ -40,8 +40,11 @@ export default function SpeakingPractice() {
   // ✅ Khởi tạo SpeechRecognition
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // 👇 Khai báo mở rộng kiểu cho window
       const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+
       if (SpeechRecognition) {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.lang = "ko-KR";
