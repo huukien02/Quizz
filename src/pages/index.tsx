@@ -26,6 +26,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import PopupMenu from '../components/PopupMenu'
 const cx = classNames.bind(styles);
 
 export const list = [
@@ -176,6 +177,7 @@ export default function Index() {
                 size={25}
               />
             </span>
+            <PopupMenu />
             <button
               onClick={() => {
                 setTheme(!theme);

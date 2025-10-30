@@ -20,6 +20,7 @@ import Head from "next/head";
 import { ToastContainer, toast } from "react-toastify";
 import { Brightness4, Brightness7 } from "@mui/icons-material";
 import "react-toastify/dist/ReactToastify.css";
+import PopupMenu from '../components/PopupMenu'
 
 const list = [
   { name: "bai-1", title: "Bài 1" },
@@ -168,19 +169,19 @@ const TestPage = () => {
       </Head>
 
       <Box sx={{ maxWidth: 600, mx: "auto", mt: 5, textAlign: "center" }}>
-        {/* Nút đổi theme */}
-        <IconButton
-          onClick={() =>
-            setThemeMode(themeMode === "light" ? "dark" : "light")
-          }
-          sx={{ position: "absolute", top: 16, right: 16 }}
-          color="inherit"
-        >
-          {themeMode === "light" ? <Brightness4 /> : <Brightness7 />}
-        </IconButton>
-
+        <PopupMenu />
         <Typography variant="h5" gutterBottom>
           🧠 Kiểm tra từ vựng tiếng Hàn
+          {/* Nút đổi theme */}
+          <IconButton
+            onClick={() =>
+              setThemeMode(themeMode === "light" ? "dark" : "light")
+            }
+            // sx={{ position: "absolute", top: 16, right: 16 }}
+            color="inherit"
+          >
+            {themeMode === "light" ? <Brightness4 /> : <Brightness7 />}
+          </IconButton>
         </Typography>
 
         <FormControl fullWidth sx={{ mb: 3 }}>
