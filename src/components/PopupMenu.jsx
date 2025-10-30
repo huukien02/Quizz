@@ -68,6 +68,13 @@ export default function PopupMenu() {
             >
               <ListItemText primary=" Test" />
             </ListItemButton>
+               <ListItemButton
+              component={Link}
+              href="/read"
+              onClick={() => setOpen(false)}
+            >
+              <ListItemText primary=" Read" />
+            </ListItemButton>
           </List>
         </DialogContent>
       </Dialog>
