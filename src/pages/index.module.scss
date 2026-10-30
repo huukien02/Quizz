@@ -26,14 +26,6 @@
       @apply flex gap-[10px];
     }
 
-    .lessons {
-      @apply flex gap-[8px] overflow-x-auto pt-[4px] pb-[8px] px-[2px];
-      scrollbar-width: none;
-      &::-webkit-scrollbar {
-        display: none;
-      }
-    }
-
     .progress-row {
       @apply flex items-center gap-[12px] font-extrabold text-[14px];
       color: var(--k-muted);
@@ -112,6 +104,16 @@
       }
       &::after {
         background: var(--k-pink);
+      }
+    }
+
+    .empty {
+      @apply items-center justify-center gap-[14px] cursor-default;
+      &:hover {
+        transform: none;
+      }
+      > * {
+        @apply relative z-[1];
       }
     }
 

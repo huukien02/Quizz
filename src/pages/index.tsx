@@ -22,49 +22,14 @@ import PopupMenu from '../components/PopupMenu'
 import Mascot from "../components/Mascot";
 import Decor from "../components/Decor";
 import useThemeMode from "../lib/useThemeMode";
+import LessonPicker from "../components/LessonPicker";
+import { DEFAULT_LESSONS, useLessons } from "../lib/lessons";
 const cx = classNames.bind(styles);
 
-export const list = [
-  {
-    name: "bai-1",
-    title: "Bài 1",
-  },
-  {
-    name: "bai-2",
-    title: "Bài 2",
-  },
-  {
-    name: "bai-3",
-    title: "Bài 3",
-  },
-  {
-    name: "bai-4",
-    title: "Bài 4",
-  },
-  {
-    name: "bai-5",
-    title: "Bài 5",
-  },
-  {
-    name: "bai-6",
-    title: "Bài 6",
-  },
-  {
-    name: "bai-7",
-    title: "Bài 7",
-  },
-  {
-    name: "bai-8",
-    title: "Bài 8",
-  },
-  {
-    name: "bai-9",
-    title: "Bài 9",
-  },
-];
 export default function Index() {
   const [open, setOpen] = useState(false);
-  const [selectedValue, setSelectedValue] = useState(list[0].name);
+  const list = useLessons();
+  const [selectedValue, setSelectedValue] = useState(DEFAULT_LESSONS[0].name);
 
   const [currentMenu, setCurrentMenu] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -93,6 +58,7 @@ export default function Index() {
       if (snapshot.exists()) {
         setDataTexts(Object.values(snapshot.val()));
       } else {
+        setDataTexts([]); // Bài trống: không giữ lại từ của bài trước
         toast.warn("Bài này chưa có từ khóa nào");
       }
     };
@@ -156,7 +122,7 @@ export default function Index() {
         />
         <link rel="icon" href="/duahau.png" />
       </Head>
-      <Add open={open} setOpen={setOpen} />
+      <Add open={open} setOpen={setOpen} lesson={selectedValue} />
 
       <div className={cx("ctn", "k-root")} data-theme={theme ? "light" : "dark"}>
         <Decor />
@@ -192,17 +158,21 @@ export default function Index() {
             </div>
           </header>
 
-          <div className={cx("lessons")}>
-            {list.map((item: any) => (
-              <button
-                key={item.name}
-                className={cx("k-chip", { "is-active": selectedValue === item.name })}
-                onClick={() => handleChange({ target: { value: item.name } })}
-              >
-                📘 {item.title}
-              </button>
-            ))}
-          </div>
+          <LessonPicker
+            lessons={list}
+            value={selectedValue}
+            onChange={(name) => handleChange({ target: { value: name } })}
+            onCreated={(name) => {
+              setCurrentPage(1);
+              handleChange({ target: { value: name } });
+            }}
+            onDeleted={(name) => {
+              if (name === selectedValue) {
+                setCurrentPage(1);
+                handleChange({ target: { value: DEFAULT_LESSONS[0].name } });
+              }
+            }}
+          />
 
           <div className={cx("progress-row")}>
             <span>
@@ -222,6 +192,15 @@ export default function Index() {
             </div>
           </div>
 
+          {dataTexts.length === 0 ? (
+            <div className={cx("card", "card--front", "empty")}>
+              <Mascot size={110} mood="sad" />
+              <span className="k-bubble">Bài này chưa có từ nào 🌱</span>
+              <button onClick={() => setOpen(true)} className="k-btn">
+                <FaPlus size={16} /> Thêm từ đầu tiên
+              </button>
+            </div>
+          ) : (
           <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
             <div
               className={cx("card", "card--front")}
@@ -324,6 +303,7 @@ export default function Index() {
               </div>
             </div>
           </ReactCardFlip>
+          )}
 
           <div className={cx("page")}>
             <Pagination

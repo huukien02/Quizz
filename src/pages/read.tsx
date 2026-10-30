@@ -9,21 +9,11 @@ import PopupMenu from "../components/PopupMenu";
 import Mascot from "../components/Mascot";
 import Decor from "../components/Decor";
 import useThemeMode from "../lib/useThemeMode";
+import { useLessons } from "../lib/lessons";
 import Head from "next/head";
 
-const list = [
-  { name: "bai-1", title: "Bài 1" },
-  { name: "bai-2", title: "Bài 2" },
-  { name: "bai-3", title: "Bài 3" },
-  { name: "bai-4", title: "Bài 4" },
-  { name: "bai-5", title: "Bài 5" },
-  { name: "bai-6", title: "Bài 6" },
-  { name: "bai-7", title: "Bài 7" },
-  { name: "bai-8", title: "Bài 8" },
-  { name: "bai-9", title: "Bài 9" },
-];
-
 export default function SpeakingPractice() {
+  const list = useLessons();
   const [word, setWord] = useState<string>("증상");
   const [userSpeech, setUserSpeech] = useState("");
   const [score, setScore] = useState<number | null>(null);

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Box,
@@ -13,19 +13,25 @@ import {
 import { getDatabase, ref, set, push } from "firebase/database";
 import app from "../firebaseConfig";
 import { toast } from "react-toastify";
-import { list } from ".";
 import Mascot from "../components/Mascot";
+import { DEFAULT_LESSONS, useLessons } from "../lib/lessons";
 
 interface Props {
   open: any;
   setOpen: any;
+  lesson?: string; // Bài đang xem, chọn sẵn khi mở modal
 }
 
 
-const Add: React.FC<Props> = ({ open, setOpen }) => {
+const Add: React.FC<Props> = ({ open, setOpen, lesson }) => {
+  const list = useLessons();
   const [koreanText, setKoreanText] = useState("");
   const [vietnameseText, setVietnameseText] = useState("");
-  const [selectedValue, setSelectedValue] = useState(list[0].name);
+  const [selectedValue, setSelectedValue] = useState(DEFAULT_LESSONS[0].name);
+
+  useEffect(() => {
+    if (open && lesson) setSelectedValue(lesson);
+  }, [open, lesson]);
 
   const [error, setError] = useState(false);
 

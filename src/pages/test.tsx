@@ -11,18 +11,8 @@ import PopupMenu from '../components/PopupMenu'
 import Mascot from "../components/Mascot";
 import Decor from "../components/Decor";
 import useThemeMode from "../lib/useThemeMode";
-
-const list = [
-  { name: "bai-1", title: "Bài 1" },
-  { name: "bai-2", title: "Bài 2" },
-  { name: "bai-3", title: "Bài 3" },
-  { name: "bai-4", title: "Bài 4" },
-  { name: "bai-5", title: "Bài 5" },
-  { name: "bai-6", title: "Bài 6" },
-  { name: "bai-7", title: "Bài 7" },
-  { name: "bai-8", title: "Bài 8" },
-  { name: "bai-9", title: "Bài 9" },
-];
+import { useLessons } from "../lib/lessons";
+import LessonPicker from "../components/LessonPicker";
 
 const TOTAL_QUESTIONS = 10;
 const TIME_PER_QUESTION = 20;
@@ -37,6 +27,7 @@ interface Question {
 }
 
 const TestPage = () => {
+  const list = useLessons();
   const [selectedLesson, setSelectedLesson] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -185,22 +176,15 @@ const TestPage = () => {
             </div>
           </header>
 
-          <div className="k-lessons">
-            {list.map((item) => (
-              <button
-                key={item.name}
-                className={`k-chip ${selectedLesson === item.name ? "is-active" : ""}`}
-                onClick={() => {
-                  const lesson = item.name;
-                  if (lesson === selectedLesson) return;
-                  setSelectedLesson(lesson);
-                  fetchLesson(lesson);
-                }}
-              >
-                📘 {item.title}
-              </button>
-            ))}
-          </div>
+          <LessonPicker
+            lessons={list}
+            value={selectedLesson}
+            onChange={(lesson) => {
+              if (lesson === selectedLesson) return;
+              setSelectedLesson(lesson);
+              fetchLesson(lesson);
+            }}
+          />
 
           {loading && (
             <div className="k-empty">
