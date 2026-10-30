@@ -1,20 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Container,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-} from "@mui/material";
+import "../app/globals.css";
+import React, { useState, useEffect, useRef } from "react";
 import { DarkMode, LightMode, Mic, Shuffle } from "@mui/icons-material";
 import { getDatabase, ref, get } from "firebase/database";
 import app from "../firebaseConfig";
 import PopupMenu from "../components/PopupMenu";
+import Mascot from "../components/Mascot";
+import Decor from "../components/Decor";
+import useThemeMode from "../lib/useThemeMode";
 import Head from "next/head";
 
 const list = [
@@ -33,7 +27,8 @@ export default function SpeakingPractice() {
   const [word, setWord] = useState<string>("증상");
   const [userSpeech, setUserSpeech] = useState("");
   const [score, setScore] = useState<number | null>(null);
-  const [darkMode, setDarkMode] = useState(true); // mặc định tối
+  const [themeMode, setThemeMode] = useThemeMode(); // mặc định tối
+  const darkMode = themeMode === "dark";
   const [loading, setLoading] = useState(false);
   const recognitionRef = useRef<any>(null);
 
@@ -51,22 +46,6 @@ export default function SpeakingPractice() {
       }
     }
   }, []);
-
-  // 🎨 Theme MUI
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: darkMode ? "dark" : "light",
-          primary: { main: darkMode ? "#90caf9" : "#1976d2" },
-          background: {
-            default: darkMode ? "#121212" : "#f5f5f5",
-            paper: darkMode ? "#1e1e1e" : "#ffffff",
-          },
-        },
-      }),
-    [darkMode]
-  );
 
   // 🔄 Lấy ngẫu nhiên 1 từ tiếng Hàn từ Firebase
   const fetchRandomWord = async () => {
@@ -137,74 +116,99 @@ export default function SpeakingPractice() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <>
       <Head>
         <title>Dưa Hấu</title>
         <link rel="icon" href="/duahau.png" />
       </Head>
 
-      <Container maxWidth="sm" sx={{ mt: 6 }}>
-        <PopupMenu />
-        <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
-          {/* Nút chuyển sáng/tối */}
-          <div style={{ textAlign: "right" }}>
-            <IconButton onClick={() => setDarkMode((p) => !p)}>
-              {darkMode ? <LightMode /> : <DarkMode />}
-            </IconButton>
+      <div className="k-root k-page" data-theme={darkMode ? "dark" : "light"}>
+        <Decor />
+        <div className="k-shell k-page__shell">
+          <header className="k-header">
+            <div className="k-brand">
+              <Mascot
+                size={60}
+                mood={score === null ? "happy" : score >= 80 ? "excited" : "sad"}
+              />
+              <div>
+                <p className="k-eyebrow k-ko">따라 말해 보세요! 🎙️</p>
+                <h1 className="k-h1">Luyện phát âm tiếng Hàn</h1>
+              </div>
+            </div>
+            <div className="k-actions">
+              {/* Nút chuyển sáng/tối */}
+              <button
+                onClick={() => setThemeMode(darkMode ? "light" : "dark")}
+                className="k-btn k-btn--icon k-btn--butter"
+                aria-label="Đổi giao diện sáng/tối"
+              >
+                {darkMode ? <LightMode /> : <DarkMode />}
+              </button>
+              <PopupMenu />
+            </div>
+          </header>
+
+          <div className="k-panel">
+            <p className="text-[14px] font-bold" style={{ color: "var(--k-muted)" }}>
+              🔊 Hãy đọc to từ này
+            </p>
+            <p
+              key={word}
+              className="k-ko k-anim-pop my-[14px] leading-tight"
+              style={{ fontSize: "clamp(44px, 10vw, 72px)" }}
+            >
+              {loading ? "Đang tải..." : word}
+            </p>
           </div>
 
-          <Typography variant="h5" align="center" gutterBottom>
-            🗣️ Luyện phát âm tiếng Hàn
-          </Typography>
+          <div className="flex flex-wrap justify-center gap-[12px]">
+            <button onClick={fetchRandomWord} className="k-btn k-btn--lav">
+              <Shuffle /> Lấy từ ngẫu nhiên
+            </button>
 
-          <Typography
-            variant="h3"
-            align="center"
-            sx={{ my: 3, fontWeight: "bold" }}
-          >
-            {loading ? "Đang tải..." : word}
-          </Typography>
-
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <Button
-              variant="outlined"
-              startIcon={<Shuffle />}
-              onClick={fetchRandomWord}
-              sx={{ mr: 2 }}
-            >
-              Lấy từ ngẫu nhiên
-            </Button>
-
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Mic />}
+            <button
               onClick={handleRecord}
               disabled={loading}
+              className="k-btn k-btn--pink"
             >
-              Nói thử
-            </Button>
+              <Mic /> Nói thử
+            </button>
           </div>
 
           {userSpeech && (
-            <>
-              <Typography align="center">
-                <strong>Bạn nói:</strong> {userSpeech}
-              </Typography>
-              <Typography align="center" sx={{ mt: 1 }}>
-                <strong>Điểm chính xác:</strong>{" "}
-                {score !== null &&
-                  (score >= 80 ? (
-                    <span style={{ color: "lightgreen" }}>{score}% ✅</span>
-                  ) : (
-                    <span style={{ color: "salmon" }}>{score}% ❌</span>
-                  ))}
-              </Typography>
-            </>
+            <div className="k-panel k-anim-rise flex flex-col items-center gap-[10px]">
+              <span className="k-bubble">
+                <strong>Bạn nói:</strong> <span className="k-ko">{userSpeech}</span>
+              </span>
+              {score !== null && (
+                <>
+                  <div className="w-full flex items-center gap-[12px]">
+                    <strong className="text-[15px] whitespace-nowrap">Điểm chính xác:</strong>
+                    <div className="k-progress flex-1">
+                      <span
+                        style={{
+                          width: `${score}%`,
+                          background:
+                            score >= 80 ? "var(--k-mint-strong)" : "var(--k-pink-strong)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <p
+                    className="k-anim-pop font-black text-[36px]"
+                    style={{
+                      color: score >= 80 ? "var(--k-mint-deep)" : "var(--k-pink-deep)",
+                    }}
+                  >
+                    {score >= 80 ? `${score}% ✅` : `${score}% ❌`}
+                  </p>
+                </>
+              )}
+            </div>
           )}
-        </Paper>
-      </Container>
-    </ThemeProvider>
+        </div>
+      </div>
+    </>
   );
 }

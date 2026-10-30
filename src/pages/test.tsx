@@ -1,26 +1,16 @@
 "use client";
+import "../app/globals.css";
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Button,
-  Typography,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Card,
-  CardContent,
-  CircularProgress,
-  IconButton,
-} from "@mui/material";
-import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import { getDatabase, ref, get } from "firebase/database";
 import app from "../firebaseConfig";
 import Head from "next/head";
 import { ToastContainer, toast } from "react-toastify";
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+import { DarkMode, LightMode } from "@mui/icons-material";
 import "react-toastify/dist/ReactToastify.css";
 import PopupMenu from '../components/PopupMenu'
+import Mascot from "../components/Mascot";
+import Decor from "../components/Decor";
+import useThemeMode from "../lib/useThemeMode";
 
 const list = [
   { name: "bai-1", title: "Bài 1" },
@@ -37,6 +27,8 @@ const list = [
 const TOTAL_QUESTIONS = 10;
 const TIME_PER_QUESTION = 20;
 
+const CONFETTI_COLORS = ["#5CC9A7", "#FF8FAB", "#A58BFF", "#FFD15C", "#8FD3FF"];
+
 interface Question {
   koreanText: string;
   vietnameseText: string;
@@ -52,7 +44,7 @@ const TestPage = () => {
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIME_PER_QUESTION);
   const [finished, setFinished] = useState(false);
-  const [themeMode, setThemeMode] = useState<"light" | "dark">("dark");
+  const [themeMode, setThemeMode] = useThemeMode();
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -146,116 +138,201 @@ const TestPage = () => {
     };
   }, [currentIndex, questions, finished]);
 
-  const theme = createTheme({
-    palette: {
-      mode: themeMode,
-      ...(themeMode === "dark"
-        ? {
-            background: {
-              default: "#121212",
-              paper: "#1e1e1e",
-            },
-          }
-        : {}),
-    },
-  });
+  // Vòng đồng hồ đếm ngược
+  const RADIUS = 22;
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const isWarn = timeLeft <= 5;
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <>
       <Head>
         <title>Dưa Hấu</title>
         <link rel="icon" href="/duahau.png" />
       </Head>
 
-      <Box sx={{ maxWidth: 600, mx: "auto", mt: 5, textAlign: "center" }}>
-        <PopupMenu />
-        <Typography variant="h5" gutterBottom>
-          🧠 Kiểm tra từ vựng tiếng Hàn
-          {/* Nút đổi theme */}
-          <IconButton
-            onClick={() =>
-              setThemeMode(themeMode === "light" ? "dark" : "light")
-            }
-            // sx={{ position: "absolute", top: 16, right: 16 }}
-            color="inherit"
-          >
-            {themeMode === "light" ? <Brightness4 /> : <Brightness7 />}
-          </IconButton>
-        </Typography>
+      <div className="k-root k-page" data-theme={themeMode}>
+        <Decor />
+        <div className="k-shell k-page__shell">
+          <header className="k-header">
+            <div className="k-brand">
+              <Mascot
+                size={60}
+                mood={
+                  finished
+                    ? score >= TOTAL_QUESTIONS / 2
+                      ? "excited"
+                      : "sad"
+                    : "happy"
+                }
+              />
+              <div>
+                <p className="k-eyebrow k-ko">시험 시간! 📝</p>
+                <h1 className="k-h1">Kiểm tra từ vựng tiếng Hàn</h1>
+              </div>
+            </div>
+            <div className="k-actions">
+              {/* Nút đổi theme */}
+              <button
+                onClick={() =>
+                  setThemeMode(themeMode === "light" ? "dark" : "light")
+                }
+                className="k-btn k-btn--icon k-btn--butter"
+                aria-label="Đổi giao diện sáng/tối"
+              >
+                {themeMode === "light" ? <DarkMode /> : <LightMode />}
+              </button>
+              <PopupMenu />
+            </div>
+          </header>
 
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>Chọn bài</InputLabel>
-          <Select
-            value={selectedLesson}
-            label="Chọn bài"
-            onChange={(e) => {
-              const lesson = e.target.value;
-              setSelectedLesson(lesson);
-              fetchLesson(lesson);
-            }}
-          >
+          <div className="k-lessons">
             {list.map((item) => (
-              <MenuItem key={item.name} value={item.name}>
-                {item.title}
-              </MenuItem>
+              <button
+                key={item.name}
+                className={`k-chip ${selectedLesson === item.name ? "is-active" : ""}`}
+                onClick={() => {
+                  const lesson = item.name;
+                  if (lesson === selectedLesson) return;
+                  setSelectedLesson(lesson);
+                  fetchLesson(lesson);
+                }}
+              >
+                📘 {item.title}
+              </button>
             ))}
-          </Select>
-        </FormControl>
+          </div>
 
-        {loading && <CircularProgress />}
+          {loading && (
+            <div className="k-empty">
+              <Mascot size={90} className="k-anim-bounce" />
+              Đang chuẩn bị câu hỏi...
+            </div>
+          )}
 
-        {!loading && questions.length > 0 && !finished && (
-          <Card sx={{ p: 2 }}>
-            <CardContent>
-              <Typography variant="h6">
-                Câu {currentIndex + 1}/{TOTAL_QUESTIONS}
-              </Typography>
-              <Typography variant="h4" sx={{ my: 2 }}>
-                {questions[currentIndex].koreanText}
-              </Typography>
+          {!loading && !finished && questions.length === 0 && (
+            <div className="k-empty">
+              <Mascot size={100} mood={selectedLesson ? "sad" : "happy"} />
+              <span className="k-bubble">
+                {selectedLesson
+                  ? "Bài này chưa đủ từ để làm test 😢"
+                  : "Chọn một bài để bắt đầu nhé! 🎯"}
+              </span>
+            </div>
+          )}
 
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
-                Thời gian còn lại: {timeLeft}s
-              </Typography>
-
-              {questions[currentIndex].options.map((opt) => (
-                <Button
-                  key={opt}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ my: 1 }}
-                  onClick={() => handleAnswer(opt)}
+          {!loading && questions.length > 0 && !finished && (
+            <div className="flex flex-col gap-[18px]">
+              <div className="flex items-center gap-[14px]">
+                <div className="flex-1 flex flex-col gap-[8px]">
+                  <span className="font-extrabold text-[15px]">
+                    Câu {currentIndex + 1}/{TOTAL_QUESTIONS}
+                  </span>
+                  <div className="k-progress">
+                    <span
+                      style={{
+                        width: `${((currentIndex + 1) / TOTAL_QUESTIONS) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div
+                  className={`k-timer ${isWarn ? "is-warn" : ""}`}
+                  title="Thời gian còn lại"
                 >
-                  {opt}
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+                  <svg width="54" height="54" viewBox="0 0 54 54">
+                    <circle cx="27" cy="27" r={RADIUS} fill="none" stroke="var(--k-line)" strokeWidth="6" />
+                    <circle
+                      cx="27"
+                      cy="27"
+                      r={RADIUS}
+                      fill="none"
+                      stroke={isWarn ? "var(--k-pink-strong)" : "var(--k-mint-strong)"}
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      strokeDasharray={CIRCUMFERENCE}
+                      strokeDashoffset={
+                        CIRCUMFERENCE * (1 - timeLeft / TIME_PER_QUESTION)
+                      }
+                    />
+                  </svg>
+                  <span style={{ color: isWarn ? "var(--k-pink-deep)" : "inherit" }}>
+                    {timeLeft}s
+                  </span>
+                </div>
+              </div>
 
-        {finished && (
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="h5" gutterBottom>
-              🎉 Hoàn thành bài test!
-            </Typography>
-            <Typography variant="h6">
-              Điểm của bạn: {score}/{TOTAL_QUESTIONS}
-            </Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2 }}
-              onClick={() => fetchLesson(selectedLesson)}
-            >
-              Làm lại
-            </Button>
-          </Box>
-        )}
-      </Box>
+              <div className="k-panel">
+                <p className="text-[14px] font-bold" style={{ color: "var(--k-muted)" }}>
+                  Từ này nghĩa là gì?
+                </p>
+                <p
+                  key={currentIndex}
+                  className="k-ko k-anim-pop my-[10px] leading-tight"
+                  style={{ fontSize: "clamp(38px, 8vw, 56px)" }}
+                >
+                  {questions[currentIndex].koreanText}
+                </p>
+              </div>
 
-      <ToastContainer />
-    </ThemeProvider>
+              <div className="k-options" key={`opts-${currentIndex}`}>
+                {questions[currentIndex].options.map((opt, i) => (
+                  <button
+                    key={opt}
+                    className="k-option"
+                    style={{ animationDelay: `${i * 0.06}s` }}
+                    onClick={() => handleAnswer(opt)}
+                  >
+                    <span className="k-option__key">{"ABCD"[i]}</span>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {finished && (
+            <div className="k-panel relative overflow-hidden flex flex-col items-center gap-[10px]">
+              {score >= TOTAL_QUESTIONS / 2 && (
+                <div className="k-confetti" aria-hidden="true">
+                  {Array.from({ length: 18 }).map((_, i) => (
+                    <i
+                      key={i}
+                      style={{
+                        left: `${(i * 37) % 100}%`,
+                        background: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+                        animationDelay: `${(i % 6) * 0.35}s`,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              <Mascot
+                size={110}
+                mood={score >= TOTAL_QUESTIONS / 2 ? "excited" : "sad"}
+              />
+              <h2 className="k-ko text-[26px]">
+                {score >= TOTAL_QUESTIONS / 2 ? "잘했어요! 🎉" : "괜찮아요! 💪"}
+              </h2>
+              <p className="font-extrabold text-[18px]">Hoàn thành bài test!</p>
+              <p
+                className="k-anim-pop font-black"
+                style={{ fontSize: 44, color: "var(--k-mint-deep)" }}
+              >
+                {score}/{TOTAL_QUESTIONS}
+              </p>
+              <button
+                className="k-btn k-btn--pink relative"
+                onClick={() => fetchLesson(selectedLesson)}
+              >
+                Làm lại
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ToastContainer theme={themeMode} />
+    </>
   );
 };
 

@@ -8,8 +8,7 @@ import { FcIdea } from "react-icons/fc";
 import { GiSpeaker } from "react-icons/gi";
 import ReactCardFlip from "react-card-flip";
 import Pagination from "@mui/material/Pagination";
-import { MdOutlineDarkMode } from "react-icons/md";
-import { CiLight } from "react-icons/ci";
+import { DarkMode, LightMode } from "@mui/icons-material";
 import { LiaRandomSolid } from "react-icons/lia";
 import KoreanMatchingGame from "./game";
 import Head from "next/head";
@@ -19,14 +18,10 @@ import app from "../firebaseConfig";
 import { FaPlus } from "react-icons/fa6";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  Dialog,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@mui/material";
 import PopupMenu from '../components/PopupMenu'
+import Mascot from "../components/Mascot";
+import Decor from "../components/Decor";
+import useThemeMode from "../lib/useThemeMode";
 const cx = classNames.bind(styles);
 
 export const list = [
@@ -74,7 +69,9 @@ export default function Index() {
   const [currentMenu, setCurrentMenu] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [suggest, setSuggest] = useState(false);
-  const [theme, setTheme] = useState(false);
+  const [themeMode, setThemeMode] = useThemeMode();
+  const theme = themeMode === "light";
+  const setTheme = (light: boolean) => setThemeMode(light ? "light" : "dark");
 
   const handleSpeak = (e: any, text: string) => {
     e.stopPropagation();
@@ -161,111 +158,73 @@ export default function Index() {
       </Head>
       <Add open={open} setOpen={setOpen} />
 
-      <div
-        className={cx(
-          "ctn",
-          theme ? "bg-[#fff] text-[black]" : "bg-[black] text-[#fff]"
-        )}
-      >
-        <div className={cx("w")}>
-          <h1 className={cx("title")}>
-            <span className="flex items-center gap-[10px]">
-              Từ vựng tiếng Hàn{" "}
-              <FaPlus
+      <div className={cx("ctn", "k-root")} data-theme={theme ? "light" : "dark"}>
+        <Decor />
+        <div className={cx("w", "k-shell")}>
+          <header className={cx("title")}>
+            <div className={cx("brand")}>
+              <Mascot size={64} mood={isFlipped ? "excited" : "happy"} />
+              <div>
+                <p className={cx("hello", "k-ko")}>안녕하세요! 오늘도 화이팅 💪</p>
+                <h1 className={cx("heading")}>Từ vựng tiếng Hàn</h1>
+              </div>
+            </div>
+            <div className={cx("actions")}>
+              <button
                 onClick={() => setOpen(true)}
-                className="text-[blue] cursor-pointer"
-                size={25}
-              />
+                className="k-btn k-btn--icon"
+                aria-label="Thêm từ mới"
+                title="Thêm từ mới"
+              >
+                <FaPlus size={18} />
+              </button>
+              <button
+                onClick={() => {
+                  setTheme(!theme);
+                }}
+                className="k-btn k-btn--icon k-btn--butter"
+                aria-label="Đổi giao diện sáng/tối"
+                title="Đổi giao diện"
+              >
+                {theme ? <DarkMode /> : <LightMode />}
+              </button>
+              <PopupMenu />
+            </div>
+          </header>
+
+          <div className={cx("lessons")}>
+            {list.map((item: any) => (
+              <button
+                key={item.name}
+                className={cx("k-chip", { "is-active": selectedValue === item.name })}
+                onClick={() => handleChange({ target: { value: item.name } })}
+              >
+                📘 {item.title}
+              </button>
+            ))}
+          </div>
+
+          <div className={cx("progress-row")}>
+            <span>
+              Thẻ {dataTexts.length ? currentPage : 0}/
+              {Math.ceil(dataTexts.length / itemsPerPage)}
             </span>
-            <PopupMenu />
-            <button
-              onClick={() => {
-                setTheme(!theme);
-              }}
-            >
-              {theme ? <MdOutlineDarkMode /> : <CiLight />}
-            </button>
-          </h1>
-          <FormControl
-            sx={{
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme ? "#dfdfdf" : "#74747459",
-              },
-              "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
-                {
-                  borderColor: "#586de2",
-                },
-            }}
-          >
-            <InputLabel
-              sx={{
-                color: !theme ? "white !important" : "black !important", // Màu chữ mặc định
-              }}
-            >
-              Chọn bài
-            </InputLabel>
-            <Select
-              value={selectedValue}
-              label="Chọn bài"
-              onChange={handleChange}
-              sx={{
-                "& .MuiSelect-select": {
-                  color: !theme ? "white !important" : "black !important",
-                },
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    backgroundColor: !theme ? "black" : "white", // Đặt màu nền cho menu là đen
-                    border: theme ? "1px solid #dfdfdf" : "1px solid #74747459",
-                    borderRadius: "10px",
-                    color: "red",
-                  },
-                },
-              }}
-            >
-              {list.map((item: any) => (
-                <MenuItem
-                  key={item.name}
-                  value={item.name}
-                  selected={selectedValue === item.name} // Đánh dấu item là selected
-                  sx={{
-                    backgroundColor:
-                      selectedValue === item.name
-                        ? theme
-                          ? "black"
-                          : "white"
-                        : "", // Màu nền nếu item được chọn
-                    color: !theme ? "white" : "black", // Màu chữ mặc định
-                    "&:hover": {
-                      backgroundColor:
-                        selectedValue === item.name
-                          ? theme
-                            ? "black"
-                            : "white"
-                          : "", // Màu nền khi hover
-                      color: "#586de2", // Màu chữ khi hover
-                    },
-                    "&.Mui-selected": {
-                      backgroundColor: !theme
-                        ? "black !important"
-                        : "white !important ", // Màu nền cho item được chọn
-                      color: "#586de2", // Màu chữ cho item được chọn
-                    },
-                  }}
-                >
-                  {item.title}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            <div className={cx("bar", "k-progress")}>
+              <span
+                style={{
+                  width: `${
+                    dataTexts.length
+                      ? Math.min(100, (currentPage / Math.ceil(dataTexts.length / itemsPerPage)) * 100)
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
 
           <ReactCardFlip isFlipped={isFlipped} flipDirection="horizontal">
             <div
-              className={cx(
-                "card",
-                theme ? "border border-[#e7e7e7]" : "border border-[#161616]"
-              )}
+              className={cx("card", "card--front")}
               onClick={() => setIsFlipped(!isFlipped)}
             >
               <div className={cx("header")}>
@@ -274,42 +233,47 @@ export default function Index() {
                     e.stopPropagation();
                     setSuggest(!suggest);
                   }}
-                  className={cx("btn")}
+                  className={cx("btn", "k-chip")}
                 >
                   <FcIdea size={20} />
-                  {!suggest
-                    ? "Hiển thị gợi ý"
-                    : currentItems[0].vietnameseText
-                    ? currentItems[0].vietnameseText.replace(
-                        /\S/g,
-                        (char: any, index: any) => {
-                          // Check if the character is the first character of a word
-                          return index === 0 ||
-                            currentItems[0].vietnameseText[index - 1] === " "
-                            ? char // Return the character if it's the first character of a word
-                            : "*"; // Replace with '*' otherwise
-                        }
-                      )
-                    : ""}
+                  <span>
+                    {!suggest
+                      ? "Hiển thị gợi ý"
+                      : currentItems[0].vietnameseText
+                      ? currentItems[0].vietnameseText.replace(
+                          /\S/g,
+                          (char: any, index: any) => {
+                            // Check if the character is the first character of a word
+                            return index === 0 ||
+                              currentItems[0].vietnameseText[index - 1] === " "
+                              ? char // Return the character if it's the first character of a word
+                              : "*"; // Replace with '*' otherwise
+                          }
+                        )
+                      : ""}
+                  </span>
                 </button>
                 <button
                   onClick={(e) => handleSpeak(e, currentItems[0].koreanText)}
-                  className={cx("btn")}
+                  className="k-btn k-btn--icon"
+                  aria-label="Nghe phát âm"
                 >
-                  <GiSpeaker size={20} />
+                  <GiSpeaker size={24} />
                 </button>
               </div>
               <div className={cx("body")}>
-                <span className={cx("korean-text")}>
+                <span className={cx("lang-tag", "k-ko")}>한국어</span>
+                <span
+                  key={`ko-${currentPage}-${selectedValue}`}
+                  className={cx("korean-text", "k-ko", "k-anim-pop")}
+                >
                   {currentItems[0] && currentItems[0].koreanText}
                 </span>
+                <span className={cx("tap-hint")}>Chạm để lật thẻ 👆</span>
               </div>
             </div>
             <div
-              className={cx(
-                "card",
-                theme ? "border border-[#e7e7e7]" : "border border-[#161616]"
-              )}
+              className={cx("card", "card--back")}
               onClick={() => setIsFlipped(!isFlipped)}
             >
               <div className={cx("header")}>
@@ -318,41 +282,49 @@ export default function Index() {
                     e.stopPropagation();
                     setSuggest(!suggest);
                   }}
-                  className={cx("btn")}
+                  className={cx("btn", "k-chip")}
                 >
                   <FcIdea size={20} />
-
-                  {!suggest
-                    ? "Hiển thị gợi ý"
-                    : currentItems[0].koreanText
-                    ? currentItems[0].koreanText.replace(
-                        /\S/g,
-                        (char: any, index: any) => {
-                          // Check if the character is the first character of a word
-                          return index === 0 ||
-                            currentItems[0].koreanText[index - 1] === " "
-                            ? char // Return the character if it's the first character of a word
-                            : "*"; // Replace with '*' otherwise
-                        }
-                      )
-                    : ""}
+                  <span>
+                    {!suggest
+                      ? "Hiển thị gợi ý"
+                      : currentItems[0].koreanText
+                      ? currentItems[0].koreanText.replace(
+                          /\S/g,
+                          (char: any, index: any) => {
+                            // Check if the character is the first character of a word
+                            return index === 0 ||
+                              currentItems[0].koreanText[index - 1] === " "
+                              ? char // Return the character if it's the first character of a word
+                              : "*"; // Replace with '*' otherwise
+                          }
+                        )
+                      : ""}
+                  </span>
                 </button>
                 <button
                   onClick={(e) =>
                     handleSpeak(e, currentItems[0].vietnameseText)
                   }
-                  className={cx("btn")}
+                  className="k-btn k-btn--icon k-btn--pink"
+                  aria-label="Nghe phát âm"
                 >
-                  <GiSpeaker size={20} />
+                  <GiSpeaker size={24} />
                 </button>
               </div>
               <div className={cx("body")}>
-                <span className={cx("korean-text")}>
+                <span className={cx("lang-tag")}>Tiếng Việt</span>
+                <span
+                  key={`vi-${currentPage}-${selectedValue}`}
+                  className={cx("korean-text", "k-anim-pop")}
+                >
                   {currentItems[0] && currentItems[0].vietnameseText}
                 </span>
+                <span className={cx("tap-hint")}>Chạm để lật lại 👆</span>
               </div>
             </div>
           </ReactCardFlip>
+
           <div className={cx("page")}>
             <Pagination
               count={Math.ceil(dataTexts.length / itemsPerPage)}
@@ -362,20 +334,52 @@ export default function Index() {
                 setCurrentPage(value);
               }}
               variant="outlined"
-              color="primary"
               sx={{
                 "& .MuiPaginationItem-root": {
-                  color: theme ? "black" : "white", // Thay đổi màu chữ tại đây
+                  color: "var(--k-ink)",
+                  borderColor: "var(--k-line)",
+                  borderWidth: 2,
+                  borderRadius: "12px",
+                  fontFamily: "Nunito, sans-serif",
+                  fontWeight: 800,
+                  backgroundColor: "var(--k-surface-2)",
+                  transition: "transform .15s",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    backgroundColor: "var(--k-mint)",
+                  },
+                },
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  backgroundColor: "var(--k-mint-strong)",
+                  borderColor: "var(--k-mint-strong)",
+                  color: "#fff",
+                  boxShadow: "0 3px 0 var(--k-mint-deep)",
+                  "&:hover": { backgroundColor: "var(--k-mint-strong)" },
+                },
+                "& .MuiPaginationItem-ellipsis": {
+                  border: "none",
+                  backgroundColor: "transparent",
+                },
+                "@media (max-width: 640px)": {
+                  "& .MuiPaginationItem-root": {
+                    minWidth: 28,
+                    height: 28,
+                    margin: "0 2px",
+                    padding: 0,
+                    fontSize: 13,
+                  },
                 },
               }}
             />
-            <button onClick={handleShuffle}>
-              <LiaRandomSolid size={25} />
+            <button onClick={handleShuffle} className="k-btn k-btn--lav">
+              <LiaRandomSolid size={22} /> Trộn thẻ
             </button>
           </div>
+          <p className={cx("keys")}>⌨️ ← → chuyển thẻ · Enter lật thẻ</p>
         </div>
       </div>
-      <ToastContainer />
+      <ToastContainer theme={theme ? "light" : "dark"} />
     </>
   );
 }
+

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Modal,
   Box,
-  Button,
   Typography,
   TextField,
   FormControl,
@@ -15,6 +14,7 @@ import { getDatabase, ref, set, push } from "firebase/database";
 import app from "../firebaseConfig";
 import { toast } from "react-toastify";
 import { list } from ".";
+import Mascot from "../components/Mascot";
 
 interface Props {
   open: any;
@@ -55,6 +55,7 @@ const Add: React.FC<Props> = ({ open, setOpen }) => {
     <Modal
       open={open}
       onClose={() => setOpen(false)}
+      container={() => document.querySelector(".k-root") ?? document.body}
       aria-labelledby="add-modal-title"
       aria-describedby="add-modal-description"
     >
@@ -65,19 +66,72 @@ const Add: React.FC<Props> = ({ open, setOpen }) => {
           left: "50%",
           transform: "translate(-50%, -50%)",
           width: 400,
-          bgcolor: "background.paper",
-          border: "2px solid #000",
-          boxShadow: 24,
+          maxWidth: "calc(100vw - 32px)",
+          bgcolor: "var(--k-bg)",
+          color: "var(--k-ink)",
+          border: "2px solid var(--k-line)",
+          boxShadow: "0 8px 0 var(--k-line), 0 30px 60px -20px rgba(122,96,140,.5)",
           p: 4,
-          borderRadius: 2,
+          borderRadius: "28px",
+          outline: "none",
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "16px",
+            bgcolor: "var(--k-surface)",
+            color: "var(--k-ink)",
+            fontFamily: "Nunito, Jua, sans-serif",
+            fontWeight: 700,
+          },
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "var(--k-line)", borderWidth: 2 },
+          "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "var(--k-mint-strong)",
+          },
+          "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+            { borderColor: "var(--k-mint-strong)" },
+          "& .MuiSelect-icon": { color: "var(--k-muted)" },
+          "& .MuiInputLabel-root": {
+            fontFamily: "Nunito, sans-serif",
+            fontWeight: 700,
+            color: "var(--k-muted)",
+          },
+          "& .MuiInputLabel-root.Mui-focused": { color: "var(--k-mint-deep)" },
+          "& .MuiInputLabel-root.Mui-error, & .MuiFormHelperText-root.Mui-error": {
+            color: "var(--k-pink-deep)",
+          },
         }}
       >
+        <div className="flex flex-col items-center gap-[4px] mb-[20px] text-center">
+          <Mascot size={72} mood="excited" />
+          <Typography
+            id="add-modal-title"
+            sx={{ fontFamily: "Jua, Nunito, sans-serif", fontSize: 24, color: "var(--k-ink)" }}
+          >
+            새 단어 추가 ✨
+          </Typography>
+          <Typography sx={{ fontFamily: "Nunito, sans-serif", fontWeight: 700, color: "var(--k-muted)" }}>
+            Thêm từ mới vào bài học
+          </Typography>
+        </div>
         <FormControl fullWidth>
           <InputLabel>Chọn bài</InputLabel>
           <Select
             value={selectedValue}
             label="Chọn bài"
             onChange={handleChange}
+            MenuProps={{
+              container: () => document.querySelector(".k-root") ?? document.body,
+              PaperProps: {
+                sx: {
+                  bgcolor: "var(--k-surface)",
+                  color: "var(--k-ink)",
+                  borderRadius: "16px",
+                  border: "2px solid var(--k-line)",
+                  fontFamily: "Nunito, sans-serif",
+                  "& .MuiMenuItem-root": { fontFamily: "Nunito, sans-serif", fontWeight: 700 },
+                  "& .MuiMenuItem-root:hover": { bgcolor: "var(--k-mint)" },
+                  "& .MuiMenuItem-root.Mui-selected": { bgcolor: "var(--k-mint)" },
+                },
+              },
+            }}
           >
             {list.map((item) => (
               <MenuItem key={item.name} value={item.name}>
@@ -111,15 +165,13 @@ const Add: React.FC<Props> = ({ open, setOpen }) => {
           value={vietnameseText}
           onChange={(e) => setVietnameseText(e.target.value)}
         />
-        <Button
+        <button
           disabled={!koreanText || !vietnameseText}
           onClick={handleAddText}
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
+          className="k-btn w-full mt-[16px]"
         >
           Thêm
-        </Button>
+        </button>
       </Box>
     </Modal>
   );
